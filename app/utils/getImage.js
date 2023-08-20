@@ -131,5 +131,28 @@ export const getImage = image => {
       return require('../assets/images/top_gifter_leaderboard.jpg');
     case 'top_received':
       return require('../assets/images/top_received.jpg');
+    case 'ic_add':
+      return require('../assets/images/ic_add.png');
+    case 'ic_online_user':
+      return require('../assets/images/ic_online_user.png');
+    case 'el_off':
+      return require('../assets/images/el_off.png');
+    case 'ic_mute':
+      return require('../assets/images/ic_mute.png');
+    case 'ic_chat_bg':
+      return require('../assets/images/ic_chat_bg.png');
+    case 'ic_gift_box':
+      return require('../assets/images/ic_gift_box.png');
+
+    case 'ic_emoji':
+      return require('../assets/images/ic_emoji.png');
+    case 'ic_mic':
+      return require('../assets/images/ic_mic.png');
+    case 'ic_more_option':
+      return require('../assets/images/ic_more_option.png');
+    case 'ic_msg':
+      return require('../assets/images/ic_msg.png');
+    case 'ic_music':
+      return require('../assets/images/ic_music.png');
   }
 };

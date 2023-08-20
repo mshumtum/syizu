@@ -106,9 +106,14 @@ import AudioMuteIcon from '../../assets/svg/AudioMuteIcon';
 import {socket} from '../../../App';
 import VideoModal from '../../components/VideoModal';
 import {showMessage} from 'react-native-flash-message';
+import {getFont} from '../../utils/getFont';
+import moment from 'moment';
+import useKeyboard from '../../utils/useKeyboard';
 
 const ChatRoom = ({navigation, route}) => {
   const {room_id, userId, from} = route.params;
+  const {isKeyboardOpen} = useKeyboard();
+
   const [isMenuVisible, setMenuVisible] = useState(false);
   const refRBSheetList = useRef();
   const flatListView = useRef(null);
@@ -1437,12 +1442,14 @@ const ChatRoom = ({navigation, route}) => {
   };
 
   function convertUTCToLocalTime(dateString) {
-    var theDate = new Date(Date.parse(dateString));
-    theDate.toLocaleString();
-    var date = `${theDate.getDate()}-${
-      theDate.getMonth() + 1
-    }-${theDate.getFullYear()}`;
-    // console.log(date);
+    // var theDate = new Date(Date.parse(dateString));
+    // theDate.toLocaleString();
+    // var date = `${theDate.getDate()}-${
+    //   theDate.getMonth() + 1
+    // }-${theDate.getFullYear()}`;
+    // // console.log(date);
+    // return date;
+    let date = moment(new Date(dateString)).format('hh:mm A, DD-MMM');
     return date;
   }
 
@@ -1609,15 +1616,13 @@ const ChatRoom = ({navigation, route}) => {
       {audioPersonList != null ? (
         <ImageBackground
           style={styles.containerStyle}
-          source={{
-            uri:
-              audioPersonList[0].userId.backgroundImage != ''
-                ? audioPersonList[0].userId.backgroundImage
-                : '',
-          }}>
-          {/* <Image
-        source={require('../../assets/gifs/WhatsApp Video 2023-06-14 at 11.05.59 PM.mp4')}
-        style={{width: 100, height: 100}}></Image> */}
+          source={
+            audioPersonList[0].userId.backgroundImage == ''
+              ? getImage('ic_chat_bg')
+              : {
+                  uri: audioPersonList[0].userId.backgroundImage,
+                }
+          }>
           <ImageBackground
             source={{
               uri:
@@ -1632,14 +1637,14 @@ const ChatRoom = ({navigation, route}) => {
               backgroundColor:
                 audioPersonList[0].userId.backgroundImage != ''
                   ? 'transparent'
-                  : appColors.light_purple,
+                  : '#5F00BA',
             }}>
             <View style={styles.headerStyle}>
-              <TouchableOpacity
-                onPress={() => setExitModalVisible(true)}
-                style={{padding: 8, marginTop: 10}}>
-                <WhiteBackArrow />
-              </TouchableOpacity>
+              <Image
+                style={{width: 35, height: 35, borderRadius: 8}}
+                source={{uri: chatroomData?.image}}
+              />
+
               <View style={{flex: 1, justifyContent: 'center'}}>
                 <Text style={styles.headerTextStyle} numberOfLines={1}>
                   {chatroomData.chatRoomName}
@@ -1652,13 +1657,29 @@ const ChatRoom = ({navigation, route}) => {
                   }}
                   // onPress={() => openAddAudioList()}
                 >
+                  <Text
+                    style={{
+                      color: appColors.white,
+                      fontSize: 8,
+                      fontWeight: '400',
+                    }}>
+                    Id: {chatroomData?.chatRoomId}
+                  </Text>
                   <TouchableOpacity
                     onPress={() => openOnlineMember()}
                     style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <Image source={getImage('activechat')} />
-                    <Text style={{color: appColors.white}}>
-                      {' '}
-                      {onlineMembersList.length} online
+                    <Image
+                      style={{width: 7, height: 10, marginLeft: 5}}
+                      source={getImage('ic_online_user')}
+                    />
+                    <Text
+                      style={{
+                        color: appColors.white,
+                        fontSize: 8,
+                        fontWeight: '400',
+                      }}>
+                      {'  '}
+                      {onlineMembersList.length}
                     </Text>
                   </TouchableOpacity>
                   {franchiseDetail != null &&
@@ -1679,32 +1700,15 @@ const ChatRoom = ({navigation, route}) => {
                 </View>
               </View>
 
-              {/* <TouchableOpacity onPress={() => callbackRequest('')}>
-            <Image
-              source={getImage('refresh')}
-              style={{height: 20, width: 20, marginRight: 10}}
-            />
-          </TouchableOpacity> */}
-
-              {/* {isAdmin == 1 ? (
-            <TouchableOpacity
-              style={{alignSelf: 'flex-end', marginEnd: 16}}
-              onPress={() => refRBSheetList.current.open()}>
-              <AddChatIcon />
-            </TouchableOpacity>
-          ) : (
-            <View />
-          )} */}
-
               <TouchableOpacity
-                style={{alignSelf: 'flex-end', marginEnd: 16}}
+                style={{marginEnd: 16}}
                 onPress={() => onShare()}>
                 <ShareIcon />
               </TouchableOpacity>
               <TouchableOpacity
-                style={{alignSelf: 'flex-end', paddingHorizontal: 5}}
-                onPress={() => setIsMenuOpen(true)}>
-                <MenuIcon />
+                style={{paddingHorizontal: 5}}
+                onPress={() => setExitModalVisible(true)}>
+                <Image source={getImage('el_off')} />
               </TouchableOpacity>
             </View>
             {audioPersonList != null ? (
@@ -1745,21 +1749,13 @@ const ChatRoom = ({navigation, route}) => {
                       </View>
                     )}
                     {audioPersonList[0].isMute == 1 ? (
-                      <View style={{marginTop: -30, marginLeft: 12}}>
+                      <View style={{marginTop: -35, marginLeft: 12}}>
                         <AudioMuteIcon />
                       </View>
                     ) : (
                       ''
                     )}
-                    <Text
-                      style={{
-                        fontSize: 10,
-                        color: appColors.white,
-                        alignSelf: 'center',
-                        height: 14,
-                        marginTop: 5,
-                      }}
-                      numberOfLines={2}>
+                    <Text style={styles.userText} numberOfLines={2}>
                       {audioPersonList[0].userId.userName}
                     </Text>
                   </TouchableOpacity>
@@ -1777,7 +1773,7 @@ const ChatRoom = ({navigation, route}) => {
                         ? openAddAudioList()
                         : checkMemberExist()
                     }>
-                    <AddUserIcon />
+                    <AddUserIcon title={'0'} />
                   </TouchableOpacity>
                 )}
                 {audioPersonList.length > 1 ? (
@@ -1814,21 +1810,13 @@ const ChatRoom = ({navigation, route}) => {
                       <DummyUserImage height={50} width={50} />
                     )}
                     {audioPersonList[1].isMute == 1 ? (
-                      <View style={{marginTop: -30, marginLeft: 12}}>
+                      <View style={{marginTop: -35, marginLeft: 12}}>
                         <AudioMuteIcon />
                       </View>
                     ) : (
                       ''
                     )}
-                    <Text
-                      style={{
-                        fontSize: 10,
-                        color: appColors.white,
-                        alignSelf: 'center',
-                        height: 14,
-                        marginTop: 5,
-                      }}
-                      numberOfLines={2}>
+                    <Text style={styles.userText} numberOfLines={2}>
                       {audioPersonList[1].userId.userName}\{' '}
                     </Text>
                   </TouchableOpacity>
@@ -1846,7 +1834,7 @@ const ChatRoom = ({navigation, route}) => {
                         ? openAddAudioList()
                         : checkMemberExist()
                     }>
-                    <AddUserIcon />
+                    <AddUserIcon title={'1'} />
                   </TouchableOpacity>
                 )}
 
@@ -1884,21 +1872,13 @@ const ChatRoom = ({navigation, route}) => {
                       <DummyUserImage height={50} width={50} />
                     )}
                     {audioPersonList[2].isMute == 1 ? (
-                      <View style={{marginTop: -30, marginLeft: 12}}>
+                      <View style={{marginTop: -35, marginLeft: 12}}>
                         <AudioMuteIcon />
                       </View>
                     ) : (
                       ''
                     )}
-                    <Text
-                      numberOfLines={2}
-                      style={{
-                        fontSize: 10,
-                        color: appColors.white,
-                        alignSelf: 'center',
-                        height: 14,
-                        marginTop: 15,
-                      }}>
+                    <Text numberOfLines={2} style={styles.userText}>
                       {audioPersonList[2].userId.userName}
                       {/* UserName */}
                     </Text>
@@ -1917,7 +1897,7 @@ const ChatRoom = ({navigation, route}) => {
                         ? openAddAudioList()
                         : checkMemberExist()
                     }>
-                    <AddUserIcon />
+                    <AddUserIcon title={'2'} />
                   </TouchableOpacity>
                 )}
                 {audioPersonList.length > 3 ? (
@@ -1954,21 +1934,13 @@ const ChatRoom = ({navigation, route}) => {
                       <DummyUserImage height={50} width={50} />
                     )}
                     {audioPersonList[3].isMute == 1 ? (
-                      <View style={{marginTop: -30, marginLeft: 12}}>
+                      <View style={{marginTop: -35, marginLeft: 12}}>
                         <AudioMuteIcon />
                       </View>
                     ) : (
                       ''
                     )}
-                    <Text
-                      numberOfLines={2}
-                      style={{
-                        fontSize: 10,
-                        color: appColors.white,
-                        alignSelf: 'center',
-                        height: 14,
-                        marginTop: 15,
-                      }}>
+                    <Text numberOfLines={2} style={styles.userText}>
                       {audioPersonList[3].userId.userName}
                       {/* UserName */}
                     </Text>
@@ -1987,7 +1959,7 @@ const ChatRoom = ({navigation, route}) => {
                         ? openAddAudioList()
                         : checkMemberExist()
                     }>
-                    <AddUserIcon />
+                    <AddUserIcon title={'3'} />
                   </TouchableOpacity>
                 )}
                 {audioPersonList.length > 4 ? (
@@ -2024,21 +1996,13 @@ const ChatRoom = ({navigation, route}) => {
                       <DummyUserImage height={50} width={50} />
                     )}
                     {audioPersonList[4].isMute == 1 ? (
-                      <View style={{marginTop: -30, marginLeft: 12}}>
+                      <View style={{marginTop: -35, marginLeft: 12}}>
                         <AudioMuteIcon />
                       </View>
                     ) : (
                       ''
                     )}
-                    <Text
-                      numberOfLines={2}
-                      style={{
-                        fontSize: 10,
-                        color: appColors.white,
-                        alignSelf: 'center',
-                        height: 14,
-                        marginTop: 15,
-                      }}>
+                    <Text numberOfLines={2} style={styles.userText}>
                       {audioPersonList[4].userId.userName}
                       {/* UserName */}
                     </Text>
@@ -2057,7 +2021,7 @@ const ChatRoom = ({navigation, route}) => {
                         ? openAddAudioList()
                         : checkMemberExist()
                     }>
-                    <AddUserIcon />
+                    <AddUserIcon title={'4'} />
                   </TouchableOpacity>
                 )}
               </View>
@@ -2105,21 +2069,13 @@ const ChatRoom = ({navigation, route}) => {
                       <DummyUserImage height={50} width={50} />
                     )}
                     {audioPersonList[5].isMute ? (
-                      <View style={{marginTop: -30, marginLeft: 12}}>
+                      <View style={{marginTop: -35, marginLeft: 12}}>
                         <AudioMuteIcon />
                       </View>
                     ) : (
                       ''
                     )}
-                    <Text
-                      numberOfLines={2}
-                      style={{
-                        fontSize: 10,
-                        color: appColors.white,
-                        alignSelf: 'center',
-                        height: 14,
-                        marginTop: 15,
-                      }}>
+                    <Text numberOfLines={2} style={styles.userText}>
                       {audioPersonList[5].userId.userName}
                       {/* UserName */}
                     </Text>
@@ -2138,7 +2094,7 @@ const ChatRoom = ({navigation, route}) => {
                         ? openAddAudioList()
                         : checkMemberExist()
                     }>
-                    <AddUserIcon />
+                    <AddUserIcon title={'5'} />
                   </TouchableOpacity>
                 )}
                 {audioPersonList.length > 6 ? (
@@ -2175,21 +2131,13 @@ const ChatRoom = ({navigation, route}) => {
                       <DummyUserImage height={50} width={50} />
                     )}
                     {audioPersonList[6].isMute == 1 ? (
-                      <View style={{marginTop: -30, marginLeft: 12}}>
+                      <View style={{marginTop: -35, marginLeft: 12}}>
                         <AudioMuteIcon />
                       </View>
                     ) : (
                       ''
                     )}
-                    <Text
-                      numberOfLines={2}
-                      style={{
-                        fontSize: 10,
-                        color: appColors.white,
-                        alignSelf: 'center',
-                        height: 14,
-                        marginTop: 15,
-                      }}>
+                    <Text numberOfLines={2} style={styles.userText}>
                       {audioPersonList[6].userId.userName}
                       {/* UserName */}
                     </Text>
@@ -2208,7 +2156,7 @@ const ChatRoom = ({navigation, route}) => {
                         ? openAddAudioList()
                         : checkMemberExist()
                     }>
-                    <AddUserIcon />
+                    <AddUserIcon title={'6'} />
                   </TouchableOpacity>
                 )}
                 {audioPersonList.length > 7 ? (
@@ -2245,21 +2193,13 @@ const ChatRoom = ({navigation, route}) => {
                       <DummyUserImage height={50} width={50} />
                     )}
                     {audioPersonList[7].isMute ? (
-                      <View style={{marginTop: -30, marginLeft: 12}}>
+                      <View style={{marginTop: -35, marginLeft: 12}}>
                         <AudioMuteIcon />
                       </View>
                     ) : (
                       ''
                     )}
-                    <Text
-                      numberOfLines={2}
-                      style={{
-                        fontSize: 10,
-                        color: appColors.white,
-                        alignSelf: 'center',
-                        height: 14,
-                        marginTop: 15,
-                      }}>
+                    <Text numberOfLines={2} style={styles.userText}>
                       {audioPersonList[7].userId.userName}
                       {/* UserName */}
                     </Text>
@@ -2278,7 +2218,7 @@ const ChatRoom = ({navigation, route}) => {
                         ? openAddAudioList()
                         : checkMemberExist()
                     }>
-                    <AddUserIcon />
+                    <AddUserIcon title={'7'} />
                   </TouchableOpacity>
                 )}
                 {audioPersonList.length > 8 ? (
@@ -2315,21 +2255,13 @@ const ChatRoom = ({navigation, route}) => {
                       <DummyUserImage height={50} width={50} />
                     )}
                     {audioPersonList[8].isMute ? (
-                      <View style={{marginTop: -30, marginLeft: 12}}>
+                      <View style={{marginTop: -35, marginLeft: 12}}>
                         <AudioMuteIcon />
                       </View>
                     ) : (
                       ''
                     )}
-                    <Text
-                      numberOfLines={2}
-                      style={{
-                        fontSize: 10,
-                        color: appColors.white,
-                        alignSelf: 'center',
-                        height: 14,
-                        marginTop: 15,
-                      }}>
+                    <Text numberOfLines={2} style={styles.userText}>
                       {audioPersonList[8].userId.userName}
                       {/* UserName */}
                     </Text>
@@ -2348,7 +2280,7 @@ const ChatRoom = ({navigation, route}) => {
                         ? openAddAudioList()
                         : checkMemberExist()
                     }>
-                    <AddUserIcon />
+                    <AddUserIcon title={'8'} />
                   </TouchableOpacity>
                 )}
                 {audioPersonList.length > 9 ? (
@@ -2385,21 +2317,13 @@ const ChatRoom = ({navigation, route}) => {
                       <DummyUserImage height={50} width={50} />
                     )}
                     {audioPersonList[9].isMute ? (
-                      <View style={{marginTop: -30, marginLeft: 12}}>
+                      <View style={{marginTop: -35, marginLeft: 12}}>
                         <AudioMuteIcon />
                       </View>
                     ) : (
                       ''
                     )}
-                    <Text
-                      numberOfLines={2}
-                      style={{
-                        fontSize: 10,
-                        color: appColors.white,
-                        alignSelf: 'center',
-                        height: 14,
-                        marginTop: 15,
-                      }}>
+                    <Text numberOfLines={2} style={styles.userText}>
                       {audioPersonList[9].userId.userName}
                       {/* UserName */}
                     </Text>
@@ -2418,7 +2342,7 @@ const ChatRoom = ({navigation, route}) => {
                         ? openAddAudioList()
                         : checkMemberExist()
                     }>
-                    <AddUserIcon />
+                    <AddUserIcon title={'9'} />
                   </TouchableOpacity>
                 )}
               </View>
@@ -2561,7 +2485,7 @@ const ChatRoom = ({navigation, route}) => {
           <FlatList
             ref={flatListView}
             data={chatMessageList}
-            style={{margin: 16}}
+            style={{margin: 8}}
             showsVerticalScrollIndicator={false}
             // getItemLayout={(data, index) => ({
             //   length: 100,
@@ -2584,7 +2508,11 @@ const ChatRoom = ({navigation, route}) => {
             // onRefresh={() => loadMoreMessages()}
             // onScrollToTop={() => loadMoreMessages()}
             renderItem={({item, index}) => (
-              <View style={{flexDirection: 'row', marginTop: 16, width: '90%'}}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  marginTop: 16,
+                }}>
                 <TouchableOpacity
                   style={{alignItems: 'center'}}
                   onPress={() => openUserOption(item.senderId._id, 'message')}>
@@ -2612,14 +2540,23 @@ const ChatRoom = ({navigation, route}) => {
                 </Text> */}
                 </TouchableOpacity>
                 <View style={{margin: 10, flex: 1}}>
-                  <Text style={{color: appColors.black, fontWeight: 'bold'}}>
+                  <Text
+                    style={{
+                      color: appColors.white,
+                      fontWeight: '400',
+                      fontSize: 12,
+                      fontFamily: getFont.Rochester,
+                    }}>
                     {item.senderId.userName}
                   </Text>
                   <View
                     style={{
                       padding: 10,
-                      backgroundColor: appColors.light_grey,
-                      borderRadius: 8,
+                      // backgroundColor: appColors.light_grey,
+                      backgroundColor: 'rgba(52, 52, 52, 0.4)',
+                      borderTopEndRadius: 8,
+                      borderBottomStartRadius: 8,
+                      borderBottomEndRadius: 8,
                       marginRight: 8,
                     }}>
                     {item.message.includes('.jpg') ||
@@ -2635,13 +2572,22 @@ const ChatRoom = ({navigation, route}) => {
                           }}
                         />
                         <View style={{flexDirection: 'row'}}>
-                          <Text style={{color: appColors.grey}}>Send to</Text>
+                          <Text
+                            style={{
+                              fontFamily: getFont.Rochester,
+                              color: appColors.white,
+                              fontSize: 10,
+                            }}>
+                            Send to
+                          </Text>
                           {Object.keys(item).includes('receiverId') ? (
                             <Text
                               style={{
-                                color: appColors.primary,
+                                color: appColors.white,
                                 fontWeight: '500',
                                 marginLeft: 4,
+                                fontFamily: getFont.Rochester,
+                                fontSize: 10,
                               }}>
                               {item.receiverId.userName}
                             </Text>
@@ -2653,16 +2599,20 @@ const ChatRoom = ({navigation, route}) => {
                     ) : (
                       <Text
                         style={{
-                          color: appColors.text_grey,
+                          color: appColors.white,
+                          fontWeight: '400',
+                          fontSize: 14,
+                          fontFamily: getFont.Rochester,
                         }}>
                         {item.message}
                       </Text>
                     )}
                     <Text
                       style={{
-                        color: appColors.grey,
+                        color: appColors.white,
                         alignSelf: 'flex-end',
-                        fontSize: 12,
+                        fontSize: 10,
+                        fontFamily: getFont.Rochester,
                       }}>
                       {convertUTCToLocalTime(item.createdAt)}
                       {/* {item.createdAt} */}
@@ -2819,76 +2769,92 @@ const ChatRoom = ({navigation, route}) => {
             <View
               style={{
                 borderColor: appColors.grey,
-                borderRadius: 30,
                 paddingLeft: 10,
                 bottom: 10,
-                borderWidth: 1,
-                marginHorizontal: 10,
+                marginHorizontal: 5,
                 flexDirection: 'row',
                 alignItems: 'center',
               }}>
               <TextInput
-                placeholder="Type Here..."
+                placeholder="Say Hii.."
                 placeholderTextColor={appColors.grey}
-                style={{flex: 1, color: appColors.black}}
+                style={{
+                  flex: 1,
+                  color: appColors.white,
+                  backgroundColor: 'rgba(95, 0, 186, 0.5)',
+                  borderRadius: 30,
+                  paddingHorizontal: 12,
+                  fontFamily: getFont.italicBold,
+                }}
                 value={message}
-                onFocus={() => setEmojiVisible(false)}
+                onFocus={() => {
+                  setEmojiVisible(false);
+                }}
                 onChangeText={val => setMessage(val)}
               />
-              {audioPersonList != null && audioPersonList.length > 0 ? (
+
+              {!isKeyboardOpen ? (
                 <TouchableOpacity
-                  onPress={() => openGiftList(true)}
-                  style={{padding: 5}}>
-                  <GiftIcon />
+                  style={{marginLeft: 2}}
+                  onPress={() => {
+                    navigation.navigate('Message');
+                  }}>
+                  <Image source={getImage('ic_msg')} />
                 </TouchableOpacity>
-              ) : (
-                ''
-              )}
-              {isAdmin == 1 ? (
+              ) : null}
+
+              {isAdmin == 1 && !isKeyboardOpen ? (
                 <TouchableOpacity
-                  style={{padding: 5}}
+                  style={{padding: 2}}
                   onPress={async () => {
                     navigation.navigate('MusicListScreen');
-                    //   setWinnerModalVisible(!winnerModalVisible);
-                    // try {
-                    //   const pickerResult = await DocumentPicker.pickSingle({
-                    //     presentationStyle: 'fullScreen',
-                    //     copyTo: 'cachesDirectory',
-                    //   });
-                    //   setResult([pickerResult]);
-                    // } catch (e) {
-                    //   handleError(e);
-                    // }
                   }}>
                   <MusicIcon />
                 </TouchableOpacity>
+              ) : null}
+              {!isKeyboardOpen ? (
+                <View style={{flexDirection: 'row'}}>
+                  <TouchableOpacity
+                    style={{marginLeft: 2}}
+                    //showStickers
+                    onPress={() => {
+                      setIsMenuOpen(true);
+                      // showStickers()
+                    }}>
+                    <ImageIcon />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{marginLeft: 2}}
+                    onPress={() => showEmoji()}>
+                    <EmojiIcon />
+                  </TouchableOpacity>
+                </View>
+              ) : null}
+              {isKeyboardOpen ? (
+                <TouchableOpacity
+                  onPress={() => sendPing(message, 1, '')}
+                  style={{
+                    backgroundColor: appColors.primary,
+                    height: 40,
+                    width: 40,
+                    borderRadius: 20,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginHorizontal: 5,
+                  }}>
+                  <SendIcon />
+                </TouchableOpacity>
               ) : (
-                ''
+                <View>
+                  {audioPersonList != null && audioPersonList.length > 0 ? (
+                    <TouchableOpacity
+                      onPress={() => openGiftList(true)}
+                      style={{padding: 5}}>
+                      <GiftIcon />
+                    </TouchableOpacity>
+                  ) : null}
+                </View>
               )}
-              <TouchableOpacity
-                style={{marginLeft: 5}}
-                //showStickers
-                onPress={() => showStickers()}>
-                <ImageIcon />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={{marginLeft: 5}}
-                onPress={() => showEmoji()}>
-                <EmojiIcon />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => sendPing(message, 1, '')}
-                style={{
-                  backgroundColor: appColors.primary,
-                  height: 40,
-                  width: 40,
-                  borderRadius: 20,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginHorizontal: 5,
-                }}>
-                <SendIcon />
-              </TouchableOpacity>
             </View>
             {/* ) : (
           ''
@@ -4342,12 +4308,14 @@ const styles = StyleSheet.create({
   headerStyle: {
     flexDirection: 'row',
     marginHorizontal: 16,
+    alignItems: 'center',
+    marginTop: 10,
   },
   headerTextStyle: {
-    fontSize: 18,
+    fontSize: 16,
     color: appColors.white,
     marginLeft: 16,
-    marginTop: 2,
+    fontFamily: getFont.Rochester,
   },
   modal: {
     justifyContent: 'center',
@@ -4395,14 +4363,23 @@ const styles = StyleSheet.create({
     top: 0,
   },
   frameView: {
-    height: 60,
-    width: 60,
+    height: 55,
+    width: 55,
     alignItems: 'center',
     justifyContent: 'center',
   },
   frameImage: {
-    height: 44,
-    width: 44,
+    height: 40,
+    width: 40,
     borderRadius: 40,
+  },
+  userText: {
+    fontSize: 11,
+    color: appColors.white,
+    textAlign: 'center',
+    height: 14,
+    marginTop: 5,
+    fontFamily: getFont.Rochester,
+    alignSelf: 'center',
   },
 });
